@@ -43,8 +43,7 @@ public class LineParser : ILineParser
     {
         return new Payer
         {
-            FirstName = data[0],
-            LastName = data[1],
+            FullName = $"{data[0]} {data[1]}",
             City = data[2][1..],
             Payment = decimal.Parse(data[5].Replace(".", ",")),
             Date = DateTime.ParseExact(data[6], "yyyy-dd-MM", CultureInfo.InvariantCulture),
