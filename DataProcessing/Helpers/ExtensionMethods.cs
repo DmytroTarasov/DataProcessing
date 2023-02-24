@@ -1,4 +1,5 @@
 ﻿using DataProcessing.Models;
+using Newtonsoft.Json;
 
 namespace DataProcessing.Helpers;
 
@@ -26,5 +27,10 @@ public static class ExtensionMethods
                     Total = cityServices.Select(s => s.Total).Sum()
                 };
             });
-    } 
+    }
+
+    public static string ToJson(this IEnumerable<City> cities, JsonSerializerSettings settings)
+    {
+        return JsonConvert.SerializeObject(cities, settings);
+    }
 }
