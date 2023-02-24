@@ -2,5 +2,5 @@
 
 public interface IFileSaver
 {
-    void SaveFile(string outputDir, string content);
+    bool SaveFile(DirectoryInfo outputDir, string content);
 }

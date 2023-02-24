@@ -1,33 +1,17 @@
-﻿using DataProcessing.Helpers;
+﻿using DataProcessing;
 using DataProcessing.Read;
 using DataProcessing.Save;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-
-var directory = @"C:\Dima\Radency\Files";
 
 var lineParser = new LineParser();
 var fileReaderFactory = new FileReaderFactory(lineParser);
 var directoryReader = new DirectoryReader(fileReaderFactory);
 
-var payers = directoryReader.ReadFilesInDirectory(new DirectoryInfo(directory));
-var payersList = payers.ToList();
-foreach (var payer in payersList)
-{
-  Console.WriteLine($"{payer.FullName} {payer.City} {payer.Payment} {payer.Date} {payer.AccountNumber } {payer.Service}");  
-}
-
-var parsedFiles = lineParser.ParsedFiles;
-foreach (var pair in parsedFiles)
-{
-  Console.WriteLine($"{pair.Key}: {pair.Value}");
-}
-
-Console.WriteLine(lineParser.ErrorsCount);
-
-var outputDirectory = @"C:\Dima\Radency\Results";
-
-var saver = new FileSaver();
+IConfiguration configuration = new ConfigurationBuilder()
+  .AddJsonFile("appsettings.json")
+  .Build();
 
 var jsonSettings = new JsonSerializerSettings
 {
@@ -39,6 +23,10 @@ var jsonSettings = new JsonSerializerSettings
   Formatting = Formatting.Indented
 };
 
-saver.SaveFile(outputDirectory, payersList.Transform().ToJson(jsonSettings));
+var fileSaver = new FileSaver();
+
+var fileProcessor = new FileProcessor(directoryReader, fileSaver, configuration, jsonSettings);
+
+fileProcessor.Process();
 
 Console.ReadLine();

@@ -2,7 +2,7 @@
 
 namespace DataProcessing.Read;
 
-public class DirectoryReader
+public class DirectoryReader : IDirectoryReader
 {
     private readonly FileReaderFactory _fileReaderFactory;
 
