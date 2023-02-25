@@ -10,7 +10,7 @@ public class TxtFileReaderStrategy : IFileReaderStrategy
         _lineParser = lineParser;
     }
 
-    public IEnumerable<Payer> Read(string filePath)
+    public IEnumerable<Payer> ReadFile(string filePath)
     {
         return _lineParser.ParseLines(filePath, File.ReadLines(filePath));
     }

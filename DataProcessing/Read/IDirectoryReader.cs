@@ -4,5 +4,5 @@ namespace DataProcessing.Read;
 
 public interface IDirectoryReader
 {
-    IEnumerable<Payer> ReadFilesInDirectory(DirectoryInfo directoryInfo);
+    IEnumerable<Payer> ReadFilesInDirectory(DirectoryInfo directoryInfo, IReadOnlyList<string> fileExtensions);
 }

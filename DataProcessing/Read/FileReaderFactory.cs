@@ -13,9 +13,9 @@ public class FileReaderFactory
     {
         return fileExtension switch
         {
-            "txt" => new TxtFileReaderStrategy(_lineParser),
-            "csv" => new CsvFileReaderStrategy(_lineParser),
-            _ => throw new ApplicationException("File type was not recognized")
+            ".txt" => new TxtFileReaderStrategy(_lineParser),
+            ".csv" => new CsvFileReaderStrategy(_lineParser),
+            _ => throw new ArgumentException($"There is no Strategy defined to handle {fileExtension} file")
         };
     }      
 }

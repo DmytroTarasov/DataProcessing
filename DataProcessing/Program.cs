@@ -1,6 +1,5 @@
-﻿using DataProcessing;
+﻿using DataProcessing.Process;
 using DataProcessing.Read;
-using DataProcessing.Save;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -30,11 +29,9 @@ try
         Formatting = Formatting.Indented
     };
 
-    var fileSaver = new FileSaver();
+    var fileProcessor = new FileProcessor(directoryReader, configuration);
 
-    var fileProcessor = new FileProcessor(directoryReader, fileSaver, configuration, jsonSettings);
-
-    fileProcessor.Process();
+    fileProcessor.Process(new List<string> { ".txt", ".csv" }, jsonSettings);
 
     Console.ReadLine();
 }

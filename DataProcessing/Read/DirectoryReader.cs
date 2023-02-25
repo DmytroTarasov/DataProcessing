@@ -11,14 +11,13 @@ public class DirectoryReader : IDirectoryReader
         _fileReaderFactory = fileReaderFactory;
     }
 
-    public IEnumerable<Payer> ReadFilesInDirectory(DirectoryInfo directoryInfo)
+    public IEnumerable<Payer> ReadFilesInDirectory(DirectoryInfo directoryInfo, IReadOnlyList<string> fileExtensions)
     {
         return directoryInfo.EnumerateFiles()
-            .Where(f => f.Extension is ".txt" or ".csv")
-            .Select(f => f.FullName)
+            .Where(f => fileExtensions.Contains(f.Extension))
             .ToList()
             .SelectMany(file => _fileReaderFactory
-                .CreateStrategy(file.Split(".").Last())
-                .Read(file));
+                .CreateStrategy(file.Extension)
+                .ReadFile(file.FullName));
     }
 }

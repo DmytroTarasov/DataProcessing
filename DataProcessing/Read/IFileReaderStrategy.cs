@@ -4,5 +4,5 @@ namespace DataProcessing.Read;
 
 public interface IFileReaderStrategy
 {
-    IEnumerable<Payer> Read(string filePath);
+    IEnumerable<Payer> ReadFile(string filePath);
 }
