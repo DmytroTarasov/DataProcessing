@@ -1,4 +1,6 @@
-﻿namespace DataProcessing.Models;
+﻿using System.Collections.Generic;
+
+namespace DataProcessing.Models;
 
 public class City
 {

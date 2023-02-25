@@ -1,4 +1,6 @@
-﻿namespace DataProcessing.Read;
+﻿using System;
+
+namespace DataProcessing.Read;
 
 public class FileReaderFactory
 {

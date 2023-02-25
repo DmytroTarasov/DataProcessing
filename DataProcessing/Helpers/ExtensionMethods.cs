@@ -1,4 +1,6 @@
-﻿using DataProcessing.Models;
+﻿using System.Collections.Generic;
+using System.Linq;
+using DataProcessing.Models;
 using Newtonsoft.Json;
 
 namespace DataProcessing.Helpers;
@@ -29,8 +31,8 @@ public static class ExtensionMethods
             });
     }
 
-    public static string ToJson(this IEnumerable<City> cities, JsonSerializerSettings settings)
+    public static string ToJson(this IEnumerable<City> cities)
     {
-        return JsonConvert.SerializeObject(cities, settings);
+        return JsonConvert.SerializeObject(cities);
     }
 }

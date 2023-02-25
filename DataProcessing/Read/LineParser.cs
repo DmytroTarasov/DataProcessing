@@ -1,4 +1,7 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using DataProcessing.Models;
 
 namespace DataProcessing.Read;
@@ -10,8 +13,10 @@ public class LineParser : ILineParser
     {
         _parsedFiles = new();
     }
-    public Dictionary<string, int> ParsedFiles => _parsedFiles;
+    public int ParsedFiles => _parsedFiles.Keys.Count;
+    public int ParsedLines => _parsedFiles.Select(pair => pair.Value).Sum();
     public int ErrorsCount => _errorsCount;
+    public IEnumerable<string> InvalidFiles => _parsedFiles.Where(pair => pair.Value != 0).Select(pair => pair.Key);
     public IEnumerable<Payer> ParseLines(string fileName, IEnumerable<string> lines)
     {
         var payers = new List<Payer>();
