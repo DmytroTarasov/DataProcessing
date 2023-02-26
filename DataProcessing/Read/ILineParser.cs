@@ -11,4 +11,5 @@ public interface ILineParser
     int ParsedLines { get; }
     int ErrorsCount { get; }
     IEnumerable<string> InvalidFiles { get; }
+    void ClearProcessedInfo();
 }

@@ -36,6 +36,8 @@ public class MidnightTimer
                         $"invalid_files: [{string.Join(", ", _lineParser.InvalidFiles)}]";
         await sw.WriteLineAsync(log);
         
+        _lineParser.ClearProcessedInfo();
+        
         _timer.Interval = TimeSpan.FromDays(1).TotalMilliseconds;
         _timer.Start();
     }

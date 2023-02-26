@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Autofac;
 using DataProcessing.Helpers;
 using DataProcessing.Process;
 using DataProcessing.Read;
@@ -8,17 +9,23 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Serilog;
 
-IConfiguration configuration = new ConfigurationBuilder()
+var builder = new ContainerBuilder();
+
+var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
     .Build();
+
+builder.RegisterInstance(configuration)
+    .As<IConfiguration>()
+    .SingleInstance();
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(configuration)
     .CreateLogger();
 
-var lineParser = new LineParser();
+builder.RegisterType<LineParser>().As<ILineParser>().SingleInstance();
 
-var jsonSettings = new JsonSerializerSettings
+builder.Register(_ => new JsonSerializerSettings
 {
     DateFormatString = "yyyy-dd-MM",
     ContractResolver = new DefaultContractResolver
@@ -26,12 +33,17 @@ var jsonSettings = new JsonSerializerSettings
         NamingStrategy = new SnakeCaseNamingStrategy()
     },
     Formatting = Formatting.Indented
-};
+}).SingleInstance();
 
+builder.RegisterType<FileProcessor>().As<IFileProcessor>();
+builder.RegisterType<MidnightTimer>().AsSelf().SingleInstance();
+
+var container = builder.Build();
+var jsonSettings = container.Resolve<JsonSerializerSettings>();
 JsonConvert.DefaultSettings = () => jsonSettings;
 
-var fileProcessor = new FileProcessor(lineParser, configuration);
-var timer = new MidnightTimer(lineParser, configuration);
+var fileProcessor = container.Resolve<IFileProcessor>();
+var timer = container.Resolve<MidnightTimer>();
 
 try
 {

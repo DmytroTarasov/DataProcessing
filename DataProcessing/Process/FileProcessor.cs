@@ -78,7 +78,7 @@ public class FileProcessor : IFileProcessor
             string.IsNullOrEmpty(_config["OutputDirectory"])) return;
         var payers = await ReadFilesInDirectory(_config["InputDirectory"], fileExtensions);
         var saved = await WriteFileAsync(_config["OutputDirectory"], payers.ToList().Transform().ToJson());
-        if (saved) await DeleteFilesInDirectoryAsync(_config["InputDirectory"], fileExtensions);
+        // if (saved) await DeleteFilesInDirectoryAsync(_config["InputDirectory"], fileExtensions);
     }
 
     public async Task<bool> WriteFileAsync(string directory, string content,

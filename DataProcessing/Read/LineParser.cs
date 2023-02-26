@@ -76,4 +76,10 @@ public class LineParser : ILineParser
             _parsedFiles.Add(fileName, 1);
         }
     }
+
+    public void ClearProcessedInfo()
+    {
+        _parsedFiles.Clear();
+        _errorsCount = 0;
+    }
 }
