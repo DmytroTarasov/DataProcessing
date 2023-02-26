@@ -20,20 +20,24 @@ public class MidnightTimer
         _timer = new Timer
         {
             Interval = (DateTime.Now.AddDays(1).Date - DateTime.Now).TotalMilliseconds,
-            AutoReset = true
+            AutoReset = false
         };
-        _timer.Elapsed += SaveMetaLogFile;
+        _timer.Elapsed += SaveFile;
     }
     
-    private void SaveMetaLogFile(object sender, ElapsedEventArgs e)
+    private async void SaveFile(object sender, ElapsedEventArgs e)
     {
         if (DateTime.Now.TimeOfDay != TimeSpan.Zero || string.IsNullOrEmpty(_config["OutputDirectory"])) return;
-        using var sw = new StreamWriter(Path.Combine(_config["OutputDirectory"], 
+        await using var sw = new StreamWriter(Path.Combine(_config["OutputDirectory"], 
             DateTime.Today.ToString("MM-dd-yyyy", CultureInfo.InvariantCulture), "meta.log"));
-        sw.WriteLine($"parsed_files: {_lineParser.ParsedFiles}");
-        sw.WriteLine($"parsed_lines: {_lineParser.ParsedLines}");
-        sw.WriteLine($"found_errors: {_lineParser.ErrorsCount}");
-        sw.WriteLine($"invalid_files: [{string.Join(", ", _lineParser.InvalidFiles)}]");
+        var log = $"parsed_files: {_lineParser.ParsedFiles}\n" +
+                        $"parsed_lines: {_lineParser.ParsedLines}\n" +
+                        $"found_errors: {_lineParser.ErrorsCount}\n" + 
+                        $"invalid_files: [{string.Join(", ", _lineParser.InvalidFiles)}]";
+        await sw.WriteLineAsync(log);
+        
+        _timer.Interval = TimeSpan.FromDays(1).TotalMilliseconds;
+        _timer.Start();
     }
 
     public void Start()

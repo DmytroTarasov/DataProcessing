@@ -17,9 +17,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var lineParser = new LineParser();
-var fileReaderFactory = new FileReaderFactory(lineParser);
-var directoryReader = new DirectoryReader(fileReaderFactory);
-    
+
 var jsonSettings = new JsonSerializerSettings
 {
     DateFormatString = "yyyy-dd-MM",
@@ -32,12 +30,12 @@ var jsonSettings = new JsonSerializerSettings
 
 JsonConvert.DefaultSettings = () => jsonSettings;
 
-var fileProcessor = new FileProcessor(directoryReader, configuration);
+var fileProcessor = new FileProcessor(lineParser, configuration);
 var timer = new MidnightTimer(lineParser, configuration);
 
 try
 {
-    fileProcessor.Process(new List<string> { ".txt", ".csv" });
+    await fileProcessor.ProcessAsync(new List<string> { "txt", "csv" });
     timer.Start();
 
     Console.ReadLine();

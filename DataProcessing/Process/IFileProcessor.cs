@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
-using System.IO;
-using Newtonsoft.Json;
+using System.Threading.Tasks;
+using DataProcessing.Models;
 
 namespace DataProcessing.Process;
 
 public interface IFileProcessor
 {
-    bool Process(IReadOnlyList<string> fileExtensions);
-    bool WriteFile(DirectoryInfo outputDir, string content, string outputFileExtension);
-    void DeleteFilesInDirectory(DirectoryInfo directory, IReadOnlyList<string> fileExtensions);
+    Task<IEnumerable<Payer>> ReadFilesInDirectory(string directory, IReadOnlyList<string> fileExtensions);
+    Task<IEnumerable<Payer>> ReadFileAsync(string filePath);
+    Task ProcessAsync(IReadOnlyList<string> fileExtensions);
+    Task<bool> WriteFileAsync(string directory, string content, string outputFileExtension);
+    Task DeleteFilesInDirectoryAsync(string directory, IReadOnlyList<string> fileExtensions);
 }

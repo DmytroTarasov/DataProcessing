@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using DataProcessing.Models;
 
 namespace DataProcessing.Read;
+
 public interface ILineParser
 {
-    IEnumerable<Payer> ParseLines(string fileName, IEnumerable<string> lines);
+    Task<IEnumerable<Payer>> ParseLinesAsync(string fileName, IEnumerable<string> lines);
     int ParsedFiles { get; }
     int ParsedLines { get; }
     int ErrorsCount { get; }
