@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DataProcessing.Models;
 
-namespace DataProcessing.Read;
+namespace DataProcessing.Process;
 
 public class LineParser : ILineParser
 {

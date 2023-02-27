@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DataProcessing.Helpers;
 using DataProcessing.Models;
-using DataProcessing.Read;
 using Microsoft.Extensions.Configuration;
 
 namespace DataProcessing.Process;
@@ -27,7 +26,7 @@ public class FileProcessor : IFileProcessor
     {
         var tasks = new List<Task<IEnumerable<Payer>>>();
         var files = Directory.EnumerateFiles(directory)
-            .Where(file => fileExtensions.Contains(file.Split(".").Last()))
+            .Where(file => fileExtensions.Any(e => e.Contains(file.Split(".").Last())))
             .ToList();
 
         files.ForEach(file => { tasks.Add(Task.Run(() => ReadFileAsync(file))); });
@@ -41,7 +40,7 @@ public class FileProcessor : IFileProcessor
         var lines = new List<string>();
         
         using var sr = new StreamReader(filePath);
-        if (filePath.Split(".").Last() == "csv") await sr.ReadLineAsync();
+        if (filePath.Contains("csv")) await sr.ReadLineAsync();
         while (!sr.EndOfStream)
         {
             var buffer = new char[4096];
@@ -72,13 +71,16 @@ public class FileProcessor : IFileProcessor
         return payers;
     }
 
-    public async Task ProcessAsync(IReadOnlyList<string> fileExtensions)
+    public async Task<bool> ProcessAsync(IReadOnlyList<string> fileExtensions)
     {
         if (string.IsNullOrEmpty(_config["InputDirectory"]) ||
-            string.IsNullOrEmpty(_config["OutputDirectory"])) return;
+            string.IsNullOrEmpty(_config["OutputDirectory"])) return false;
+        _lineParser.ClearProcessedInfo();
         var payers = await ReadFilesInDirectory(_config["InputDirectory"], fileExtensions);
         var saved = await WriteFileAsync(_config["OutputDirectory"], payers.ToList().Transform().ToJson());
-        // if (saved) await DeleteFilesInDirectoryAsync(_config["InputDirectory"], fileExtensions);
+        if (!saved) return false;
+        await DeleteFilesInDirectoryAsync(_config["InputDirectory"], fileExtensions);
+        return true;
     }
 
     public async Task<bool> WriteFileAsync(string directory, string content,
@@ -100,7 +102,7 @@ public class FileProcessor : IFileProcessor
         var tasks = new List<Task>();
         Directory
             .EnumerateFiles(directory)
-            .Where(file => fileExtensions.Contains(file.Split(".").Last()))
+            .Where(file => fileExtensions.Any(e => e.Contains(file.Split(".").Last())))
             .ToList()
             .ForEach(file => { tasks.Add(Task.Run(() => File.Delete(file))); });
         await Task.WhenAll(tasks);

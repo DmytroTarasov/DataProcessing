@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.IO;
 using System.Timers;
-using DataProcessing.Read;
+using DataProcessing.Process;
 using Microsoft.Extensions.Configuration;
 
 namespace DataProcessing.Helpers;
@@ -35,9 +35,7 @@ public class MidnightTimer
                         $"found_errors: {_lineParser.ErrorsCount}\n" + 
                         $"invalid_files: [{string.Join(", ", _lineParser.InvalidFiles)}]";
         await sw.WriteLineAsync(log);
-        
-        _lineParser.ClearProcessedInfo();
-        
+
         _timer.Interval = TimeSpan.FromDays(1).TotalMilliseconds;
         _timer.Start();
     }

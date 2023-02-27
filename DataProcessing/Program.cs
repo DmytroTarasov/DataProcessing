@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Autofac;
 using DataProcessing.Helpers;
 using DataProcessing.Process;
-using DataProcessing.Read;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -47,10 +47,25 @@ var timer = container.Resolve<MidnightTimer>();
 
 try
 {
-    await fileProcessor.ProcessAsync(new List<string> { "txt", "csv" });
     timer.Start();
-
-    Console.ReadLine();
+    await ProcessAsync();
+    string input;
+    do
+    {
+        PrintMenu();
+        input = Console.ReadLine();
+        
+        switch (input)
+        {
+            case "r":
+                await ProcessAsync();
+                break;
+            case "s":
+                Environment.Exit(0);
+                break;
+        }
+        
+    } while (string.IsNullOrEmpty(input) || !input.Equals("s"));
 }
 catch (Exception ex)
 {
@@ -60,4 +75,19 @@ finally
 {
     Log.CloseAndFlush();
     timer.Stop();
+}
+
+void PrintMenu()
+{
+    Console.WriteLine("Press r - to reset");
+    Console.WriteLine("Press s - to stop");
+}
+
+async Task ProcessAsync()
+{
+    var processed = await fileProcessor.ProcessAsync(new List<string> { ".txt", ".csv" });
+        
+    Console.WriteLine(processed
+        ? "Processed successfully"
+        : "The file/files was/were not processed. Check a log file for more details");
 }
