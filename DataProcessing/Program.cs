@@ -1,23 +1,93 @@
-﻿using DataProcessing.Read;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Autofac;
+using DataProcessing.Helpers;
+using DataProcessing.Process;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using Serilog;
 
-var directory = @"C:\Dima\Radency\Files";
+var builder = new ContainerBuilder();
 
-var lineParser = new LineParser();
-var fileReaderFactory = new FileReaderFactory(lineParser);
-var directoryReader = new DirectoryReader(fileReaderFactory);
+var configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .Build();
 
-var payers = directoryReader.ReadFilesInDirectory(new DirectoryInfo(directory));
-foreach (var payer in payers)
+builder.RegisterInstance(configuration)
+    .As<IConfiguration>()
+    .SingleInstance();
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(configuration)
+    .CreateLogger();
+
+builder.RegisterType<LineParser>().As<ILineParser>().SingleInstance();
+
+builder.Register(_ => new JsonSerializerSettings
 {
-  Console.WriteLine($"{payer.FirstName} {payer.LastName} {payer.City} {payer.Payment} {payer.Date} {payer.AccountNumber } {payer.Service}");  
+    DateFormatString = "yyyy-dd-MM",
+    ContractResolver = new DefaultContractResolver
+    {
+        NamingStrategy = new SnakeCaseNamingStrategy()
+    },
+    Formatting = Formatting.Indented
+}).SingleInstance();
+
+builder.RegisterType<FileProcessor>().As<IFileProcessor>();
+builder.RegisterType<MidnightTimer>().AsSelf().SingleInstance();
+
+var container = builder.Build();
+var jsonSettings = container.Resolve<JsonSerializerSettings>();
+JsonConvert.DefaultSettings = () => jsonSettings;
+
+var fileProcessor = container.Resolve<IFileProcessor>();
+var timer = container.Resolve<MidnightTimer>();
+
+try
+{
+    timer.Start();
+    await ProcessAsync();
+    string input;
+    do
+    {
+        PrintMenu();
+        input = Console.ReadLine();
+        
+        switch (input)
+        {
+            case "r":
+                await ProcessAsync();
+                break;
+            case "s":
+                Environment.Exit(0);
+                break;
+        }
+        
+    } while (string.IsNullOrEmpty(input) || !input.Equals("s"));
+}
+catch (Exception ex)
+{
+    Log.Error(ex, ex.Message);
+}
+finally
+{
+    Log.CloseAndFlush();
+    timer.Stop();
 }
 
-var parsedFiles = lineParser.ParsedFiles;
-foreach (var pair in parsedFiles)
+void PrintMenu()
 {
-  Console.WriteLine($"{pair.Key}: {pair.Value}");
+    Console.WriteLine("Press r - to reset");
+    Console.WriteLine("Press s - to stop");
 }
 
-Console.WriteLine(lineParser.ErrorsCount);
-
-Console.ReadLine();
+async Task ProcessAsync()
+{
+    var processed = await fileProcessor.ProcessAsync(new List<string> { ".txt", ".csv" });
+        
+    Console.WriteLine(processed
+        ? "Processed successfully"
+        : "The file/files was/were not processed. Check a log file for more details");
+}
